@@ -1,0 +1,25 @@
+---
+title: "Visualization and EDA"
+author: "Grace Liu"
+date: "10/11/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Problem 1
+
+```{r}
+devtools::install_github("p8105/p8105.datasets") # install.packages("devtools")
+library(p8105.datasets)
+
+brfss_data = brfss_smart2010 %>% 
+  janitor::clean_names() %>% 
+  filter(topic == "Overall Health") %>% 
+  select(-class, -topic, -question, -sample_size, -confidence_limit_low:-geo_location) %>% 
+  spread(key = response, value = data_value)
+```
+
