@@ -92,7 +92,13 @@ instacart_data %>%
   group_by(aisle_id, aisle, product_name) %>% 
   which.max(product_name)
 
-names(max(instacart_data$product_name, na.rm = TRUE))
+sort(table(instacart_data$product_name, descending = TRUE))
+
+instacart_data %>%
+  group_by(product_name) %>% 
+  max(count(product_name)) %>% 
+  rev(sort(unique(product_name))) [1:5] %>% 
+  summarize(n_obs = n())
 ```
 
 
