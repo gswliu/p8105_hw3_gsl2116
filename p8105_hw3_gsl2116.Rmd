@@ -79,11 +79,12 @@ brfss_data %>%
 The above graph shows, for each response category, the distribution of state-level average proportions over time.  
 
 ## Problem 2
-```{r}
+```{r problem_2, include=FALSE}
 instacart_data = instacart
 ```
 **Short description of the dataset**
-This dataset has 1,384,617 observations in 15 variables, with `r nrow(plot_data)` rows and `r ncol(plot_data)` columns. 
+This dataset has 1,384,617 observations in 15 variables, with `r nrow(instacart_data)` rows and `r ncol(instacart_data)` columns. There are `r instacart_data %>% summarize(n_distinct(department))` departments with `r instacart_data %>% summarize(n_distinct(aisle_id))` distinct aisles containing `r instacart_data %>% summarize(n_distinct(product_name))` products. 
+
 noting the size and structure of the data, describing some key variables, and giving illstrative examples of observations
 
 How many aisles are there, and which aisles are the most items ordered from?
