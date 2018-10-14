@@ -131,14 +131,15 @@ instacart_data %>%
 
 The most popular item in the "Baking ingredients" aisle is light brown sugar, which was ordered 499 times. Organic baby spinach from the "Packaged vegetables fruits" aisle was ordered 9784 times, and Snack Sticks Chicken & Rick Recipe Dog Treats from the "Dog food care" aisle was ordered 30 times.  
 
-**Mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week**
+**When Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week**
 ```{r}
 instacart_data %>%
-  group_by(order_dow, product_name) %>%
+  group_by(product_name, order_dow) %>%
   filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>%
   summarize(mean_hour = mean(order_hour_of_day, na.rm = TRUE)) %>% 
-  recode(order_dow, levels=0:6,
-    labels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")) %>% 
-  knitr::kable()
+  knitr::kable(digits = 2)
 ```
+
+This table shows the mean hour of the day during which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week, starting from Sunday (0) through Saturday (6).  
+
 
