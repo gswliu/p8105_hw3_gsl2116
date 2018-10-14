@@ -17,9 +17,8 @@ library(p8105.datasets)
 ```{r problem_1}
 brfss_data = brfss_smart2010 %>% 
   janitor::clean_names() %>% 
-  filter(topic == "Overall Health")
-
-brfss_data$response = factor(c("Excellent", "Very good", "Good", "Fair", "Poor"))
+  filter(topic == "Overall Health") %>% 
+  mutate(response = factor(response, levels = c("Excellent", "Very good", "Good", "Fair", "Poor")))
 ```
 
 **In 2002, which states were observed at 7 locations? **
@@ -27,8 +26,9 @@ brfss_data$response = factor(c("Excellent", "Very good", "Good", "Fair", "Poor")
 brfss_data %>% 
   group_by(year, locationabbr) %>% 
   filter(year == 2002) %>% 
-  summarize(n_locations = n_distinct(locationdesc) == 7) %>% 
-  filter(n_locations == TRUE)
+  summarize(n_locations = n_distinct(locationdesc)) %>% 
+  filter(n_locations == 7) %>% 
+  knitr::kable()
 ```
 
 In 2002, there were 3 states where 7 locations were observed.  
@@ -38,8 +38,8 @@ In 2002, there were 3 states where 7 locations were observed.
 brfss_data %>%
   group_by(year, locationabbr) %>%
   count(n_locations = n_distinct(locationdesc)) %>% 
-  ggplot(aes(x = year, y = n_locations, color = locationabbr)) + 
-    geom_smooth(se = FALSE, alpha = .5) +
+  ggplot(aes(x = year, y = n_locations)) + 
+    geom_smooth(aes(color = locationabbr), se = FALSE, alpha = .5) +
     labs(
       title = "Number of locations in each state, 2002-2010",
       x = "Year",
@@ -59,7 +59,7 @@ brfss_data %>%
   knitr::kable(digits = 2)
 ```
 
-The mean (standard deviation) of the proportion of “Excellent” responses across locations in NY State was 26.76 (8.48) in 2002, 15.97 (10.03) in 2006, and 17.30 (8.99) in 2010.  
+The mean (standard deviation) of the proportion of “Excellent” responses across locations in NY State was 24.04 (4.49) in 2002, 22.53 (4.00) in 2006, and 22.70 (3.57) in 2010.  
 
 **Average proportion in each response category, by response and state**
 ```{r problem_1d}
@@ -83,26 +83,42 @@ The above graph shows, for each response category, the distribution of state-lev
 instacart_data = instacart
 ```
 **Short description of the dataset**  
-This dataset has 1,384,617 observations in 15 variables, with `r nrow(instacart_data)` rows and `r ncol(instacart_data)` columns. There are `r instacart_data %>% summarize(n_distinct(department))` departments with `r instacart_data %>% summarize(n_distinct(aisle_id))` distinct aisles containing `r instacart_data %>% summarize(n_distinct(product_name))` products. This dataset summarizes the contents of `r instacart_data %>% summarize(n_distinct(order_id))` distinct orders placed.
+This dataset has 1,384,617 observations in 15 variables, with `r nrow(instacart_data)` rows and `r ncol(instacart_data)` columns. There are `r instacart_data %>% summarize(n_distinct(department))` departments with `r instacart_data %>% summarize(n_distinct(aisle_id))` distinct aisles containing `r instacart_data %>% summarize(n_distinct(product_name))` products. This dataset summarizes the contents of `r instacart_data %>% summarize(n_distinct(order_id))` distinct orders placed by `r instacart_data %>% summarize(n_distinct(user_id))` users.
 
 **How many aisles are there, and which aisles are the most items ordered from?**  
-There are `r instacart_data %>% summarize(n_distinct(aisle_id))` aisles. 
+```{r}
+instacart_data %>%
+  summarize(n_distinct(aisle_id))
+
+instacart_data %>% 
+  count(aisle) %>% 
+  arrange(desc(n)) %>%
+  top_n(n = 5) %>% 
+  knitr::kable()
+```
+
+There are `r instacart_data %>% summarize(n_distinct(aisle_id))` aisles. The top 5 aisles where the most items are ordered from are (in order) "Fresh Vegetables", "Fresh Fruits", "Packaged Vegetables Fruits", "Yogurt", and "Packaged Cheese".  
+
+**Number of items ordered in each aisle**
+Order aisles sensibly, and organize your plot so others can read it.
 ```{r}
 instacart_data %>% 
-  group_by(aisle_id, aisle, product_name) %>% 
-  which.max(product_name)
+  group_by(aisle, department) %>% 
+  summarize(items = n()) %>% 
+  ggplot(aes(x = aisle, y = items, color = department)) + 
+    geom_point() +
+    labs(
+      title = "Average proportion in each response category",
+      x = "Year",
+      y = "Average proportion") + 
+    theme_minimal() +
+    facet_grid(~department)
 
-sort(table(instacart_data$product_name, descending = TRUE))
-
-instacart_data %>%
-  group_by(product_name) %>% 
-  max(count(product_name)) %>% 
-  rev(sort(unique(product_name))) [1:5] %>% 
-  summarize(n_obs = n())
+ggplot(instacart_number, aes(x = aisle_id, y = number_items)) + 
+  geom_point()
 ```
 
 
-Make a plot that shows the number of items ordered in each aisle. Order aisles sensibly, and organize your plot so others can read it.
 Make a table showing the most popular item in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”.
 Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
 
