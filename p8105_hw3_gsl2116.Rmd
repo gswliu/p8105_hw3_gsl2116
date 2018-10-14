@@ -82,12 +82,20 @@ The above graph shows, for each response category, the distribution of state-lev
 ```{r problem_2, include=FALSE}
 instacart_data = instacart
 ```
-**Short description of the dataset**
-This dataset has 1,384,617 observations in 15 variables, with `r nrow(instacart_data)` rows and `r ncol(instacart_data)` columns. There are `r instacart_data %>% summarize(n_distinct(department))` departments with `r instacart_data %>% summarize(n_distinct(aisle_id))` distinct aisles containing `r instacart_data %>% summarize(n_distinct(product_name))` products. 
+**Short description of the dataset**  
+This dataset has 1,384,617 observations in 15 variables, with `r nrow(instacart_data)` rows and `r ncol(instacart_data)` columns. There are `r instacart_data %>% summarize(n_distinct(department))` departments with `r instacart_data %>% summarize(n_distinct(aisle_id))` distinct aisles containing `r instacart_data %>% summarize(n_distinct(product_name))` products. This dataset summarizes the contents of `r instacart_data %>% summarize(n_distinct(order_id))` distinct orders placed.
 
-noting the size and structure of the data, describing some key variables, and giving illstrative examples of observations
+**How many aisles are there, and which aisles are the most items ordered from?**  
+There are `r instacart_data %>% summarize(n_distinct(aisle_id))` aisles. 
+```{r}
+instacart_data %>% 
+  group_by(aisle_id, aisle, product_name) %>% 
+  which.max(product_name)
 
-How many aisles are there, and which aisles are the most items ordered from?
+names(max(instacart_data$product_name, na.rm = TRUE))
+```
+
+
 Make a plot that shows the number of items ordered in each aisle. Order aisles sensibly, and organize your plot so others can read it.
 Make a table showing the most popular item in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”.
 Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
