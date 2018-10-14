@@ -39,12 +39,14 @@ brfss_data %>%
   group_by(year, locationabbr) %>%
   count(n_locations = n_distinct(locationdesc)) %>% 
   ggplot(aes(x = year, y = n_locations)) + 
-    geom_smooth(aes(color = locationabbr), se = FALSE, alpha = .5) +
+    geom_line(aes(color = locationabbr), alpha = .5) +
     labs(
       title = "Number of locations in each state, 2002-2010",
       x = "Year",
       y = "Number of locations") + 
-    theme_minimal()
+    theme_minimal() +
+    theme(legend.position = "bottom") +
+    guides(col = guide_legend(ncol = 10, title = "State"))
 ```
 
 The graph above shows the count of locations observed in each (plus DC) for each year between 2002 to 2010.
@@ -67,12 +69,13 @@ brfss_data %>%
   group_by(year, locationabbr, response) %>%
   summarize(mean_response = mean(data_value, na.rm = TRUE)) %>% 
   ggplot(aes(x = year, y = mean_response, color = locationabbr)) + 
-    geom_smooth(se = FALSE, alpha = .5) +
-    labs(
-      title = "Average proportion in each response category",
+    geom_line(alpha = .5) +
+    labs(title = "Average proportion in each response category",
       x = "Year",
       y = "Average proportion") + 
     theme_minimal() +
+    theme(legend.position = "bottom") +
+    guides(col = guide_legend(ncol = 10, title = "State")) +
     facet_grid(~response)
 ```
 
@@ -86,7 +89,7 @@ instacart_data = instacart
 This dataset has 1,384,617 observations in 15 variables, with `r nrow(instacart_data)` rows and `r ncol(instacart_data)` columns. There are `r instacart_data %>% summarize(n_distinct(department))` departments with `r instacart_data %>% summarize(n_distinct(aisle_id))` distinct aisles containing `r instacart_data %>% summarize(n_distinct(product_name))` products. This dataset summarizes the contents of `r instacart_data %>% summarize(n_distinct(order_id))` distinct orders placed by `r instacart_data %>% summarize(n_distinct(user_id))` users.
 
 **How many aisles are there, and which aisles are the most items ordered from?**  
-```{r}
+```{r problem_2a}
 instacart_data %>%
   summarize(n_distinct(aisle_id))
 
@@ -100,25 +103,42 @@ instacart_data %>%
 There are `r instacart_data %>% summarize(n_distinct(aisle_id))` aisles. The top 5 aisles where the most items are ordered from are (in order) "Fresh Vegetables", "Fresh Fruits", "Packaged Vegetables Fruits", "Yogurt", and "Packaged Cheese".  
 
 **Number of items ordered in each aisle**
-Order aisles sensibly, and organize your plot so others can read it.
-```{r}
+```{r problem_2b}
 instacart_data %>% 
-  group_by(aisle, department) %>% 
+  group_by(aisle_id, department) %>% 
   summarize(items = n()) %>% 
-  ggplot(aes(x = aisle, y = items, color = department)) + 
-    geom_point() +
-    labs(
-      title = "Average proportion in each response category",
-      x = "Year",
-      y = "Average proportion") + 
+  ggplot(aes(x = aisle_id, y = items, color = department)) + 
+    geom_point(alpha = .5) +
+    labs(title = "Total number of items ordered in each aisle",
+      x = "Aisle ID",
+      y = "Number items") + 
     theme_minimal() +
-    facet_grid(~department)
-
-ggplot(instacart_number, aes(x = aisle_id, y = number_items)) + 
-  geom_point()
+    theme(axis.text.x = element_text(size = 8, angle = 30, hjust = 1)) +
+    theme(legend.position = "bottom") +
+    guides(col = guide_legend(ncol = 10, title = "Department"))
 ```
 
+**Most popular item in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”**
+```{r problem_2c}
+instacart_data %>%
+  group_by(aisle) %>%
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>%
+  count(product_name) %>% 
+  arrange(desc(n)) %>%
+  top_n(n = 1) %>% 
+  knitr::kable()
+```
 
-Make a table showing the most popular item in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”.
-Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
+The most popular item in the "Baking ingredients" aisle is light brown sugar, which was ordered 499 times. Organic baby spinach from the "Packaged vegetables fruits" aisle was ordered 9784 times, and Snack Sticks Chicken & Rick Recipe Dog Treats from the "Dog food care" aisle was ordered 30 times.  
+
+**Mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week**
+```{r}
+instacart_data %>%
+  group_by(order_dow, product_name) %>%
+  filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>%
+  summarize(mean_hour = mean(order_hour_of_day, na.rm = TRUE)) %>% 
+  recode(order_dow, levels=0:6,
+    labels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")) %>% 
+  knitr::kable()
+```
 
